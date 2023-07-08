@@ -1,5 +1,8 @@
 package com.example.mapdemo
 
+import com.google.android.gms.maps.model.LatLng
+import kotlin.random.Random
+
 object Constants {
     fun getPlaceList():ArrayList<PlaceModel>
     {
@@ -47,5 +50,17 @@ object Constants {
         placesList.add(place6)
 
         return placesList
+    }
+
+    fun getAstLatLong():ArrayList<LatLng>
+    {
+        return arrayListOf<LatLng>(
+            LatLng(-35.016, 143.321),
+            LatLng(-34.747, 145.592),
+            LatLng(-34.364, 147.891),
+            LatLng(-33.501, 150.217),
+            LatLng(-32.306, 149.248),
+            LatLng(-32.491, 147.309)
+        )
     }
 }

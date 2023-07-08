@@ -1,31 +1,42 @@
 package com.example.mapdemo
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Location
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.View.OnClickListener
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.mapdemo.databinding.ActivityMainBinding
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Circle
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.CustomCap
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.GroundOverlayOptions
+import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PatternItem
+import com.google.android.gms.maps.model.PolygonOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.RoundCap
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private var binding:ActivityMainBinding? = null
@@ -84,32 +95,43 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mGoogleMap = googleMap
         addMarker(LatLng(12.345,23.232))
         addCustomMarker(R.drawable.location_pin_24dp, LatLng(12.543,23.432))
         addDraggableMarker(LatLng(12.987,23.789))
 
-        mGoogleMap?.setOnMapClickListener {position->
-            mGoogleMap?.clear()
-            addMarker(position)
+        mGoogleMap?.setOnMapClickListener {
+           addCircle(it)
         }
 
         mGoogleMap?.setOnMapLongClickListener {
             addCustomMarker(R.drawable.location_pin_24dp,it)
         }
+        mGoogleMap?.setOnMarkerClickListener {
+            it.remove()
+            false
+        }
 
-//        mGoogleMap?.setOnMarkerClickListener {
-//            it.remove()
-//            false
-//        }
+        drawLines()
+        zoomOnMap(LatLng(-23.684, 133.903))
+        addMarker(LatLng(-23.684, 133.903))
+        mGoogleMap?.setOnPolylineClickListener {
+            it.color = -0x00bb00
+        }
+
+        drawPolygon()
+        mGoogleMap?.setOnPolygonClickListener {
+            it.strokeColor = -0x00ff00
+        }
 
 
-//        val androidOverlay = GroundOverlayOptions()
-//            .image(BitmapDescriptorFactory.fromResource(R.drawable.boy_trash_throw))
-//            .position(LatLng(4.566,5.345),100f)
-//
-//        mGoogleMap?.addGroundOverlay(androidOverlay)
+        val androidOverlay = GroundOverlayOptions()
+            .image(BitmapDescriptorFactory.fromResource(R.drawable.boy_trash_throw))
+            .position(LatLng(4.566,5.345),100f)
+
+        mGoogleMap?.addGroundOverlay(androidOverlay)
     }
 
     private fun changeMap(id:Int)
@@ -125,7 +147,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun zoomOnMap(mLatLng: LatLng)
     {
-        val newLatLngZoom = CameraUpdateFactory.newLatLngZoom(mLatLng,12f)
+        val newLatLngZoom = CameraUpdateFactory.newLatLngZoom(mLatLng,4f)
         mGoogleMap?.animateCamera(newLatLngZoom)
     }
 
@@ -155,6 +177,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
+    private var circle:Circle? = null
+    private fun addCircle(centre:LatLng)
+    {
+        circle?.remove()
+        circle = mGoogleMap?.addCircle(CircleOptions()
+            .center(centre)
+            .radius(1000.0)
+            .strokeWidth(8f)
+            .strokeColor(Color.parseColor("#FF0000"))
+            .fillColor(ContextCompat.getColor(this,R.color.blue))
+        )
+    }
+
     private var isStarMarked = false
     private var starMark:Marker? = null
     private fun markStarPlace()
@@ -171,5 +206,47 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             starMark?.remove()
             isStarMarked = false
         }
+    }
+
+    private fun drawLines()
+    {
+        val DOT: PatternItem = Dot()
+        val GAP: PatternItem = Gap(20f)
+        // val DASH
+
+        val PATTERN_POLYLINE_DOTTED = listOf(GAP, DOT)
+
+        val polyline = mGoogleMap?.addPolyline(
+            PolylineOptions()
+                .clickable(true)
+                .addAll(Constants.getAstLatLong())
+                .endCap(RoundCap())
+                .startCap(CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.right_arrow)))
+                .color(ContextCompat.getColor(this,R.color.blue))
+                .jointType(JointType.BEVEL)
+                .width(12f)
+                .pattern(PATTERN_POLYLINE_DOTTED)
+        )
+    }
+
+    private fun drawPolygon()
+    {
+        val DOT: PatternItem = Dot()
+        val GAP: PatternItem = Gap(20f)
+        val DASH : PatternItem = Dash(20f)
+        val PATTERN_POLYGON_DOT_DASH = listOf(GAP, DOT, DASH,DOT)
+        val polygon = mGoogleMap?.addPolygon(
+            PolygonOptions()
+            .clickable(true)
+            .add(
+                LatLng(-27.457, 153.040),
+                LatLng(-33.852, 151.211),
+                LatLng(-37.813, 144.962),
+                LatLng(-34.928, 138.599))
+                .fillColor(-0xff00ff)
+                .strokeColor(-0xffaabb)
+                .strokeWidth(20f)
+                .strokePattern(PATTERN_POLYGON_DOT_DASH)
+        )
     }
 }
