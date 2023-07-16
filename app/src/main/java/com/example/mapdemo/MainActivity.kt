@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable.ArrowDirection
 import androidx.core.content.ContextCompat
 import com.example.mapdemo.databinding.ActivityMainBinding
 import com.google.android.gms.common.api.Status
@@ -17,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.ButtCap
 import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.CustomCap
@@ -32,10 +34,12 @@ import com.google.android.gms.maps.model.PatternItem
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.RoundCap
+import com.google.android.gms.maps.model.TileOverlayOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.maps.android.heatmaps.HeatmapTileProvider
 import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -115,7 +119,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         drawLines()
-        zoomOnMap(LatLng(-23.684, 133.903))
+        zoomOnMap(LatLng(70.0, 75.903))
         addMarker(LatLng(-23.684, 133.903))
         mGoogleMap?.setOnPolylineClickListener {
             it.color = -0x00bb00
@@ -132,6 +136,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             .position(LatLng(4.566,5.345),100f)
 
         mGoogleMap?.addGroundOverlay(androidOverlay)
+
+        addHeatMap()
     }
 
     private fun changeMap(id:Int)
@@ -147,7 +153,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun zoomOnMap(mLatLng: LatLng)
     {
-        val newLatLngZoom = CameraUpdateFactory.newLatLngZoom(mLatLng,4f)
+        val newLatLngZoom = CameraUpdateFactory.newLatLngZoom(mLatLng,6f)
         mGoogleMap?.animateCamera(newLatLngZoom)
     }
 
@@ -220,7 +226,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             PolylineOptions()
                 .clickable(true)
                 .addAll(Constants.getAstLatLong())
-                .endCap(RoundCap())
+                .endCap(ButtCap())
                 .startCap(CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.right_arrow)))
                 .color(ContextCompat.getColor(this,R.color.blue))
                 .jointType(JointType.BEVEL)
@@ -238,15 +244,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val polygon = mGoogleMap?.addPolygon(
             PolygonOptions()
             .clickable(true)
-            .add(
-                LatLng(-27.457, 153.040),
-                LatLng(-33.852, 151.211),
-                LatLng(-37.813, 144.962),
-                LatLng(-34.928, 138.599))
+            .addAll(Constants.getStarCord())
                 .fillColor(-0xff00ff)
                 .strokeColor(-0xffaabb)
                 .strokeWidth(20f)
                 .strokePattern(PATTERN_POLYGON_DOT_DASH)
         )
+    }
+
+    private fun addHeatMap()
+    {
+        val heatMapProvider = HeatmapTileProvider.Builder()
+            .weightedData(Constants.getHeatmapWeightedData())
+            .radius(20)
+            .maxIntensity(1000.0)
+            .build()
+        mGoogleMap?.addTileOverlay(TileOverlayOptions().tileProvider(heatMapProvider))
     }
 }

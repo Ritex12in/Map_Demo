@@ -13,10 +13,10 @@
         android:theme="@style/Theme.MapDemo"
         tools:targetApi="31">
         <activity
-            android:name=".FamousPlaceActivity"
+            android:name=".StreetViewsActivity"
             android:exported="false" />
         <activity
-            android:name=".StreetViewActivity"
+            android:name=".FamousPlaceActivity"
             android:exported="false" />
 
         <meta-data

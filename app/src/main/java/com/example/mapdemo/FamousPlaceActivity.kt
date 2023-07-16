@@ -25,7 +25,7 @@ class FamousPlaceActivity : AppCompatActivity() {
 
         adapter.setOnClickListener(object  : PlaceAdapter.OnClickListener{
             override fun onClick(position: Int) {
-                val intent = Intent(this@FamousPlaceActivity,StreetViewActivity::class.java)
+                val intent = Intent(this@FamousPlaceActivity,StreetViewsActivity::class.java)
                 intent.putExtra("position", position)
                 startActivity(intent)
             }

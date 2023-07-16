@@ -1,6 +1,7 @@
 package com.example.mapdemo
 
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.heatmaps.WeightedLatLng
 import kotlin.random.Random
 
 object Constants {
@@ -54,7 +55,7 @@ object Constants {
 
     fun getAstLatLong():ArrayList<LatLng>
     {
-        return arrayListOf<LatLng>(
+        return arrayListOf(
             LatLng(-35.016, 143.321),
             LatLng(-34.747, 145.592),
             LatLng(-34.364, 147.891),
@@ -62,5 +63,38 @@ object Constants {
             LatLng(-32.306, 149.248),
             LatLng(-32.491, 147.309)
         )
+    }
+    fun getStarCord():ArrayList<LatLng>
+    {
+        return arrayListOf(
+            LatLng(-27.457, 153.040),
+            LatLng(-33.852, 151.211),
+            LatLng(-37.813, 144.962),
+            LatLng(-34.928, 138.599)
+        )
+    }
+
+    fun getHeatmapData():ArrayList<LatLng>
+    {
+        val list = ArrayList<LatLng>()
+        for (i in 1..300)
+        {
+            list.add(LatLng(Random.nextDouble(50.0,75.0),Random.nextDouble(50.0,75.0)))
+        }
+        return list
+    }
+
+    fun getHeatmapWeightedData():ArrayList<WeightedLatLng>
+    {
+        val list = ArrayList<WeightedLatLng>()
+        for (i in 1..300)
+        {
+
+            list.add(WeightedLatLng(
+                LatLng(Random.nextDouble(50.0,75.0),Random.nextDouble(50.0,75.0))
+            ,Random.nextDouble(1.0,1000.0))
+            )
+        }
+        return list
     }
 }
